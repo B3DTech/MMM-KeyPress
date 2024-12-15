@@ -6,27 +6,28 @@ Module.register("MMM-KeyPress", {
     notificationReceived: function(notification, payload, sender) {
         if (notification === "DOM_OBJECTS_CREATED") {
             window.addEventListener("keydown", this.keypressHandler.bind(this));
-            window.addEventListener("touchstart", this.touchStartHandler.bind(this));
-            window.addEventListener("touchend", this.touchEndHandler.bind(this));
+            window.addEventListener("pointerdown", this.pointerDownHandler.bind(this));
+            window.addEventListener("pointerup", this.pointerUpHandler.bind(this));
         }
     },
-
+    
     touchStartX: 0,
     touchEndX: 0,
-
-    touchStartHandler: function(event) {
-        this.touchStartX = event.changedTouches[0].screenX;
+    
+    pointerDownHandler: function(event) {
+        // Pointer events provide coordinates directly on the event
+        this.touchStartX = event.screenX;
     },
-
-    touchEndHandler: function(event) {
-        this.touchEndX = event.changedTouches[0].screenX;
+    
+    pointerUpHandler: function(event) {
+        this.touchEndX = event.screenX;
         this.handleSwipe();
     },
-
+    
     handleSwipe: function() {
         var difference = this.touchEndX - this.touchStartX;
-        var threshold = 50;  // You can adjust the threshold as required
-
+        var threshold = 50;  // Adjust threshold as required
+    
         if (difference > threshold) {
             this.sendSwipeNotification("ArrowLeft");
         } else if (difference < -threshold) {
