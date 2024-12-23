@@ -37,9 +37,33 @@ Module.register("MMM-KeyPress", {
 
     sendSwipeNotification: function(direction) {
         var payload = {
-            step: (direction === "ArrowRight" ? 1 : -1)  // 1 to move forward, -1 to move backward
+            step: (direction === "ArrowRight" ? 3 : -3)  // 1 to move forward, -1 to move backward
         };
-        this.sendNotification('CX3_GLANCE_CALENDAR', payload);
+//        this.sendNotification('CX3_GLANCE_CALENDAR', payload);
+        this.sendNotification("CX3_GET_CONFIG", {
+          callback: (before) => {
+            //Ensure 'before' contains a 'weekIndex'
+            if(!before||!before.weekIndex){
+              console.error("KeyPress: Failed to retreive valid config.");
+              return;
+            }
+            console.log(before.mode, before.weekIndex)
+            this.sendNotification("CX3_SET_CONFIG", {
+              weekIndex: before.weekIndex + payload.step,
+              callback: (after) => {
+                setTimeout(() => {
+                  this.sendNotification("CX3_RESET", {
+                    payload: {
+                      callback: () => {
+                        console.log("KeyPress: CalendarExt3 was reset to current");
+                      }
+                    }
+                  });
+                }, 10000)
+              }
+           });
+         }
+       })
     },
 
     keypressHandler: function(event) {
